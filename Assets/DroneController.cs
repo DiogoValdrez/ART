@@ -6,60 +6,33 @@ public class DroneController : MonoBehaviour
 {
     public float speed = 10.0f;
     public float rotationSpeed = 100.0f;
-    public float inclination = 10.0f;
 
-    public void MoveDrone(float foward = 0, float side = 0, float updown = 0, float yaw = 0)
+    List<Vector3> path = new List<Vector3>();
+    Vector3 CurrentPosition;
+
+    void Update()
     {
-        float translation_x = side * speed;
-        float translation_y = updown * speed;
-        float translation_z =  foward * speed;
+        MoveDrone();
+    }
 
-        // float rotation_pitch;
-        // float rotation_roll;
+    public void MoveDrone()
+    {
+        if (path.Count > 0)
+        {
+            Vector3 target = path[0];
+            Vector3 direction = target - transform.position;
+            direction.y = 0;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), rotationSpeed * Time.deltaTime);
+            transform.Translate(0, 0, speed * Time.deltaTime);
+            if (Vector3.Distance(transform.position, target) < 0.5f)
+            {
+                path.RemoveAt(0);
+            }
+        }
+    }
 
-        // if(foward>0)
-        // {
-        //     rotation_pitch = inclination;
-        // }
-        // else if(foward<0)
-        // {
-        //     rotation_pitch = -inclination;
-        // }
-        // else
-        // {
-        //     rotation_pitch = 0;
-        // }
-
-        // if(side>0)
-        // {
-        //     rotation_roll = inclination;
-        // }
-        // else if(side<0)
-        // {
-        //     rotation_roll = -inclination;
-        // }
-        // else
-        // {
-        //     rotation_roll = 0;
-        // }
-
-
-
-        float rotation_pitch = 0;
-        float rotation_roll = 0;
-
-        float rotation_yaw = yaw * rotationSpeed;
-
-        translation_x *= Time.deltaTime;
-        translation_y *= Time.deltaTime;
-        translation_z *= Time.deltaTime;
-
-
-        rotation_pitch *= Time.deltaTime;
-        rotation_roll *= Time.deltaTime;
-        rotation_yaw *= Time.deltaTime;
-
-        transform.Translate(translation_x, translation_y, translation_z);
-        transform.Rotate(rotation_pitch, rotation_yaw, rotation_roll);
+    public void set_path(List<Vector3> path)
+    {
+        this.path = path;
     }
 }
