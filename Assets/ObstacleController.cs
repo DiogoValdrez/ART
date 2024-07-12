@@ -14,12 +14,12 @@ public class ObstacleController : MonoBehaviour
     /// <summary>
     /// List of positions of the obstacles.
     /// </summary>
-    private List<Vector3> obstaclePositions = new List<Vector3>();
+    public List<Vector3> obstaclePositions = new List<Vector3>();
 
     /// <summary>
     /// List of sizes of the obstacles.
     /// </summary>
-    private List<Vector3> obstacleSizes = new List<Vector3>();
+    public List<Vector3> obstacleSizes = new List<Vector3>();
 
     /// <summary>
     /// Initializes the script by resetting and updating the lists.
@@ -92,4 +92,33 @@ public class ObstacleController : MonoBehaviour
     {
         tag = new_tag;
     }
+
+    public void log_obstacle_positions()
+    {
+        foreach (Vector3 position in obstaclePositions)
+        {
+            Debug.Log("Obstacle position: " + position);
+        }
+    }
+
+    public int get_obstacle_min_size() {
+        int min_size = int.MaxValue;
+         
+        foreach (Vector3 size in obstacleSizes) {
+            int size_x = (int) size.x;
+            int size_y = (int) size.y;
+            int size_z = (int) size.z;
+            int min = Mathf.Min(size_x, size_y, size_z);
+            if (min < min_size) {
+                min_size = min;
+            }
+        }
+
+        return min_size;
+    }
+
+    public int get_number_of_obstacles() {
+        return obstaclePositions.Count;
+    }
+    
 }
