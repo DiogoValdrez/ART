@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-using AuxiliarDataStructures;
 public class DroneSwarm : MonoBehaviour
 {
     public GameObject dronePrefab;
@@ -19,7 +18,7 @@ public class DroneSwarm : MonoBehaviour
     public float max_spacing_multiplier = 1.0f;
 
     private ObstacleController obstacleController;
-    private AStarPathfinding aStarPathfinding;
+    private PathFinding pf;
 
     List<DroneController> drones = new List<DroneController>();
 
@@ -30,7 +29,7 @@ public class DroneSwarm : MonoBehaviour
         obstacleController.tag = "obstacle";
         obstacleController.reset_list();
         obstacleController.update_list();
-        obstacleController.log_obstacle_positions();
+        //obstacleController.log_obstacle_positions();
 
 
         for(int i = 0; i < this.numberOfDrones; i++) {
@@ -45,7 +44,21 @@ public class DroneSwarm : MonoBehaviour
         }
 
         if (this.find_path) {
-        
+            this.pf = gameObject.AddComponent<PathFinding>();
+
+            this.pf.init_map();
+            this.pf.create_map(obstacleController);
+            
+
+            for (int i = 0; i < this.numberOfDrones; i++) {
+                Pair<int, int> start = this.drones[i].get_current_positon_in_map();
+                Pair<int, int> end = this.drones [i].get_current_positon_in_map();
+                end.Second += 100; 
+
+                List<Pair<int, int>> path = this.pf.solve_path(start, end);
+                this.pf.reset_map();
+                drones[i].set_path(path);
+            }
         } else {
             // No need too path finding, the drone will simply try to walk in a straight line
         }

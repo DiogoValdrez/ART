@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 using System;
 
 
@@ -17,11 +18,14 @@ using System;
 public class DroneController : MonoBehaviour
 {
     private float obstacle_avoidance_coeficient = 1.5f;
-    private List<Vector3> path = new List<Vector3>();
-    private Vector3 CurrentPosition;
+    private List <Vector3> path = new List <Vector3>();
+
+    private Vector3 current_position = new Vector3(0, 0, 0);
+    private Vector3 target_position = new Vector3(0, 0, 0);
     private bool follow_path = false ;
     private float speed = 5.0f;
     private float rotationSpeed = 1.0f;
+    private int num_step = 100;
 
     /**
         Start function for the drone
@@ -29,13 +33,34 @@ public class DroneController : MonoBehaviour
         Put drone in the starting orientation
     */
     void start() {
-        
         transform.Rotate(0, 0, 0);
+        this.current_position = this.transform.position;
     }
 
 
     public void followPath() {
-        return;
+        if (path.Count == 0) {
+            Debug.Log("No more map");
+            return;
+        } 
+
+        Vector3 target_position = path[0];
+        Vector3 current_position = transform.position;
+        Vector3 diff = (target_position - current_position);
+
+        if (diff.magnitude < 0.1) {
+            this.current_position = target_position;;
+            path.RemoveAt(0);
+            Debug.Log("Target reached");
+            return;
+        }
+        
+        Vector3 movement = (target_position - this.current_position) / this.num_step;
+        Debug.Log("Movement : " +  movement + " Current position: " + this.current_position + " Target position: " + transform.position + " current_positioon " + current_position);
+        
+        transform.Translate(movement.x, movement.y, movement.z);
+
+
     }
 
     public void openLoop(List<Vector3> obstacles_positions, List<Vector3> obstacles_sizes) {
@@ -57,7 +82,6 @@ public class DroneController : MonoBehaviour
             Vector2 dist_vector_2d = new Vector2(dist_vector.x, dist_vector.z); 
 
             float ang = Mathf.Atan2(dist_vector.z, dist_vector.x);
-
 
             if (dist_vector_2d.magnitude < obstacle_size.x * 1.5f + 1) {
                 avoidance_force += new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * speed;
@@ -107,33 +131,15 @@ public class DroneController : MonoBehaviour
         transform.Rotate(rotation_pitch, rotation_yaw, rotation_roll);
     }
 
-    private void get_next_position()
+    public void set_path(List<Pair<int, int>> path)
     {
-        if ( this.follow_path  ) {
-            if (path.Count > 0)
-            {
-                Vector3 target = path[0];
-                Vector3 direction = target - transform.position;
-                direction.y = 0;
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), rotationSpeed * Time.deltaTime);
-                transform.Translate(0, 0, speed * Time.deltaTime);
-                if (Vector3.Distance(transform.position, target) < 0.5f)
-                {
-                    path.RemoveAt(0);
-                }
-            }
-        } else {
-            // Current positioon =  
-            Vector3 current_position = transform.position;
-            Vector3 current_orientation = transform.rotation.eulerAngles;
+        float y = transform.position.y;
 
+        foreach (Pair<int, int> pos in path) {
+            
 
+            this.path.Add(new Vector3(pos.First, y, pos.Second));
         }
-    }
-
-    public void set_path(List<Vector3> path)
-    {
-        this.path = path;
     }
 
     public void set_follow_path(bool follow_path)
@@ -170,6 +176,11 @@ public class DroneController : MonoBehaviour
     {
         this.obstacle_avoidance_coeficient = obstacle_avoidance_coeficient;
 
+    }
+
+    public Pair<int, int> get_current_positon_in_map()
+    {
+        return new Pair<int, int>((int)transform.position.x, (int)transform.position.z);
     }
 
     public float get_obstacle_avoidance_coeficient()

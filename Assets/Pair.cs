@@ -1,16 +1,29 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Generic;
 
-namespace AuxiliarDataStructures{
+using UnityEngine;
+
+  
+
 public class Pair<T1, T2>
 {
-    public T1 First { get; }
-    public T2 Second { get; }
+    public T1 First { get; set; }
+    public T2 Second { get; set; }
 
     public Pair(T1 first, T2 second)
     {
         First = first;
         Second = second;
+    }
+
+    public void set_first(T1 first) {
+        this.First = first;
+    }
+
+    public void set_second(T2 second) {
+        this.Second = second;
     }
 
     public override bool Equals(object obj)
@@ -36,5 +49,4 @@ public class Pair<T1, T2>
     {
         return $"({First}, {Second})";
     }
-}
 }
