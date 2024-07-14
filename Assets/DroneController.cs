@@ -40,7 +40,6 @@ public class DroneController : MonoBehaviour
 
     public void followPath() {
         if (path.Count == 0) {
-            Debug.Log("No more map");
             return;
         } 
 
@@ -51,12 +50,12 @@ public class DroneController : MonoBehaviour
         if (diff.magnitude < 0.1) {
             this.current_position = target_position;;
             path.RemoveAt(0);
-            Debug.Log("Target reached");
+            //Debug.Log("Target reached");
             return;
         }
         
         Vector3 movement = (target_position - this.current_position) / this.num_step;
-        Debug.Log("Movement : " +  movement + " Current position: " + this.current_position + " Target position: " + transform.position + " current_positioon " + current_position);
+      //  Debug.Log("Movement : " +  movement + " Current position: " + this.current_position + " Target position: " + transform.position + " current_positioon " + current_position);
         
         transform.Translate(movement.x, movement.y, movement.z);
 
@@ -73,6 +72,7 @@ public class DroneController : MonoBehaviour
         }
 
         Vector3 avoidance_force = Vector3.zero;
+        float total_ang = 0;
 
         for (int i = 0; i < obstacles_positions.Count; i++) {
             Vector3 obstacle_position = obstacles_positions[i];
@@ -83,25 +83,25 @@ public class DroneController : MonoBehaviour
 
             float ang = Mathf.Atan2(dist_vector.z, dist_vector.x);
 
-            if (dist_vector_2d.magnitude < obstacle_size.x * 1.5f + 1) {
-                avoidance_force += new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * speed;
+
+            if (dist_vector_2d.magnitude < obstacle_size.x + 0.2) {
+                Debug.Log("ang : " + ang );
+                total_ang += ang;
+                Debug.Log("Avoidance force : " + avoidance_force);
             }
         }
 
-        // Normalize the avoidance force to avoid excessive speeds
-        if (avoidance_force != Vector3.zero) {
-            avoidance_force.Normalize();
+        avoidance_force = new Vector3(Mathf.Cos(total_ang), 0, Mathf.Sin(total_ang)) * speed;
+
+        Vector3 speed_vector = Vector3.zero;
+
+        if (total_ang != 0) {
+            speed_vector = avoidance_force * Time.deltaTime;
+        }
+        else {
+            speed_vector = new Vector3(0, 0, speed) * Time.deltaTime;
         }
 
-        float norm = avoidance_force.magnitude;
-        if (norm == 0) {
-            norm = 1;
-        }
-
-        Vector3 base_speed_vector = new Vector3(0, 0, speed);
-
-        Vector3 speed_vector = (base_speed_vector + avoidance_force * norm) * Time.deltaTime;
-        
         // Combine the base speed and avoidance force
         // Move the drone
         transform.Translate(speed_vector.x, speed_vector.y, speed_vector.z);

@@ -58,6 +58,8 @@ public class DroneSwarm : MonoBehaviour
                 List<Pair<int, int>> path = this.pf.solve_path(start, end);
                 this.pf.reset_map();
                 drones[i].set_path(path);
+
+                Debug.Log("New drone") ;
             }
         } else {
             // No need too path finding, the drone will simply try to walk in a straight line

@@ -30,7 +30,9 @@ public class PathFinding : MonoBehaviour
             Debug.Log("Error: obstacles_positions.Count != obstacles_size.Count");
             return;
         }
-        
+
+        Debug.Log("Counter :  Obstacles : " + obstacles_positions.Count);  
+
         for (int i = 0; i < obstacles_positions.Count; i++) {
             Vector3 position = obstacles_positions[i];
             Vector3 size = obstacles_size[i];
@@ -38,11 +40,19 @@ public class PathFinding : MonoBehaviour
             int z = (int) position.z;
             int size_x = (int) size.x;
             int size_z = (int) size.z;
+        
+            int min_x_object = (int) Mathf.Floor(position.x - size.x);
+            int max_x_object = (int) Mathf.Ceil(position.x + size.x);
 
-            for (int j = -size_x; j < size_x; j++) {
-                for (int k = -size_z; k < size_z; k++) {
-                    if (x + j >= 0 && x + j < this.grid_size_x && z + k >= 0 && z + k < this.grid_size_z) {
-                        this.grid[x + j][z + k].set_walkable(false);
+            int min_z_object = (int) Mathf.Floor(position.z - size.z);
+            int max_z_object = (int) Mathf.Ceil(position.z + size.z);
+
+            Debug.Log("min_x + " + min_x_object + " max_x " + max_x_object + " min_z " + min_z_object + " max_z " + max_z_object);
+
+            for (int j = min_x_object; j < max_x_object; j++) {
+                for (int w = min_z_object; w < max_z_object; w++) {
+                    if (i >= 0 && i < this.grid_size_x && j >= 0 && j < this.grid_size_z) {
+                        this.grid[i][j].set_walkable(false);
                     }
                 }
             }
@@ -73,12 +83,13 @@ public class PathFinding : MonoBehaviour
             Pair <int, int>  current = q.Dequeue();
 
             if (current.Equals(end_pos)) {
-                Debug.Log(current.First + " " + current.Second + " " + end_pos.First + " " + end_pos.Second);
+                //Debug.Log(current.First + " " + current.Second + " " + end_pos.First + " " + end_pos.Second);
                 break;
             }
 
             foreach (Pair <int, int> neighbour in neighbours) {
                 Pair <int, int> new_pos = new Pair<int, int>(current.First + neighbour.First, current.Second + neighbour.Second);
+               // Debug.Log("enqueue " + new_pos.First + " " + new_pos.Second);
                 if ( this.should_enqueue(new_pos) ) {
                     this.grid[new_pos.First][new_pos.Second].set_visited(true);
                     this.grid[new_pos.First][new_pos.Second].set_origin(current);
@@ -86,8 +97,6 @@ public class PathFinding : MonoBehaviour
                 }
             }
         }
-
-        Debug.Log("Path found");
          
         List <Pair<int, int>> path = new List <Pair<int, int>>();
         Pair <int, int> c = end_pos;
@@ -100,7 +109,6 @@ public class PathFinding : MonoBehaviour
 
         path.Add (start_pos);
         path.Reverse();
-        Debug.Log("Path length: " + path.Count);
         
         return path;
     }
